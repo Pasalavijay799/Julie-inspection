@@ -65,112 +65,35 @@
       </link>
     </model>
 
-    <!-- Test object: Blue cylinder on ground, within arm reach (~0.35m from base) -->
-    <model name="test_cylinder">
+    <!-- Robot Stand (775x775x790 mm CAD → scale 0.001 → 0.775x0.775x0.79 m) -->
+    <!--
+      The STL origin is at the bottom-left corner of the stand.
+      We centre it at X=0, Y=0 and sit it on the ground (Z=0).
+      Offset X and Y by -0.3875 m (half of 0.775 m) to centre the mesh.
+    -->
+    <model name="robot_stand">
       <static>true</static>
-      <pose>0.35 0 0.05 0 0 0</pose>
-      <link name="cylinder_link">
+      <pose>-0.3875 0.3875 0.790 3.14159 0 0</pose>
+      <link name="stand_link">
         <collision name="collision">
           <geometry>
-            <cylinder>
-              <radius>0.04</radius>
-              <length>0.10</length>
-            </cylinder>
+            <mesh>
+              <uri>file:///home/julie/Music/Julie-inspection/src/jaka_visual_inspection/meshes/robot_stand.stl</uri>
+              <scale>0.001 0.001 0.001</scale>
+            </mesh>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
-            <cylinder>
-              <radius>0.04</radius>
-              <length>0.10</length>
-            </cylinder>
+            <mesh>
+              <uri>file:///home/julie/Music/Julie-inspection/src/jaka_visual_inspection/meshes/robot_stand.stl</uri>
+              <scale>0.001 0.001 0.001</scale>
+            </mesh>
           </geometry>
           <material>
-            <ambient>0.1 0.4 0.8 1</ambient>
-            <diffuse>0.1 0.4 0.8 1</diffuse>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
             <specular>0.3 0.3 0.3 1</specular>
-          </material>
-        </visual>
-      </link>
-    </model>
-
-    <!-- Test object: Red box on ground, within arm reach (~0.30m from base, offset Y) -->
-    <model name="test_box">
-      <static>true</static>
-      <pose>0.4 0.2 0.05 0 0 0.3</pose>
-      <link name="box_link">
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>0.1 0.1 0.1</size>
-            </box>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>0.1 0.1 0.1</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0.8 0.2 0.1 1</ambient>
-            <diffuse>0.8 0.2 0.1 1</diffuse>
-            <specular>0.3 0.3 0.3 1</specular>
-          </material>
-        </visual>
-      </link>
-    </model>
-
-    <model name="test_mesh_cube">
-      <static>true</static>
-      <!-- Placed on the table at an angle -->
-      <pose>0.3 -0.2 0 0 0 0</pose>
-      <link name="mesh_link">
-        <collision name="collision">
-          <geometry>
-            <mesh>
-              <uri>file:///home/troy/Pictures/jaka_ws/reference/src/geometric_shapes/test/resources/cube.stl</uri>
-              <scale>0.001 0.001 0.001</scale>
-            </mesh>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <mesh>
-              <uri>file:///home/troy/Pictures/jaka_ws/reference/src/geometric_shapes/test/resources/cube.stl</uri>
-              <scale>0.001 0.001 0.001</scale>
-            </mesh>
-          </geometry>
-          <material>
-            <ambient>0.8 0.8 0.1 1</ambient>
-            <diffuse>0.8 0.8 0.1 1</diffuse>
-          </material>
-        </visual>
-      </link>
-    </model>
-
-    <model name="test_mesh_forearm">
-      <static>true</static>
-      <pose>0.45 -0.15 0 0 0 0</pose>
-      <link name="mesh_link">
-        <collision name="collision">
-          <geometry>
-            <mesh>
-              <uri>file:///home/troy/Pictures/jaka_ws/reference/src/geometric_shapes/test/resources/forearm_roll.stl</uri>
-              <scale>0.001 0.001 0.001</scale>
-            </mesh>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <mesh>
-              <uri>file:///home/troy/Pictures/jaka_ws/reference/src/geometric_shapes/test/resources/forearm_roll.stl</uri>
-              <scale>0.001 0.001 0.001</scale>
-            </mesh>
-          </geometry>
-          <material>
-            <ambient>0.1 0.8 0.8 1</ambient>
-            <diffuse>0.1 0.8 0.8 1</diffuse>
           </material>
         </visual>
       </link>
