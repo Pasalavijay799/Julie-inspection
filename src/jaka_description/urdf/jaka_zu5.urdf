@@ -495,9 +495,10 @@
         </material>
       </visual>
       <collision>
-        <origin xyz="0.0335 -0.08 -0.005" rpy="1.5708 0 3.14159"/>
+        <!-- Box collision prevents ODE aabbBound overflow crash -->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://jaka_description/meshes/onrobot_2fg7_meshes/camera_mount.stl" scale="0.001 0.001 0.001"/>
+          <box size="0.04 0.08 0.01"/>
         </geometry>
       </collision>
     </link>
@@ -694,6 +695,8 @@
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
     </transmission>
+
+
 
     <gazebo>
         <!-- <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so"> -->

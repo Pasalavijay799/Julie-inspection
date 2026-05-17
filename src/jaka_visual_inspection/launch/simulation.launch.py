@@ -208,13 +208,61 @@ def generate_launch_description():
         parameters=rviz_parameters,
     )
 
+    # ===== ZED 2i Static TF =====
+    # Publishes world → zed2i_camera_link at the real-world mount position:
+    #   X=0.90 m, Y=0.90 m, Z=1.50 m, pitch=-0.524 rad (30° down), yaw=-2.356 rad (facing robot)
+    zed_camera_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='zed2i_camera_tf',
+        arguments=[
+            '--x',     '0.90',
+            '--y',     '0.90',
+            '--z',     '1.50',
+            '--roll',  '0.0',
+            '--pitch', '-0.524',
+            '--yaw',   '-2.356',
+            '--frame-id',       'world',
+            '--child-frame-id', 'zed2i_camera_link',
+        ],
+        output='screen',
+    )
+
+    # ===================== Hold Position at Startup =====================
+    # Publishes initial joint angles as a trajectory the moment the arm
+    # controller activates — prevents gravitational drift before MoveIt
+    # sends its first command.
+    from launch.actions import ExecuteProcess
+    hold_position = ExecuteProcess(
+        cmd=[
+            'ros2', 'topic', 'pub',
+            '--times', '10',   # publish 10 times — no subscriber wait unlike --once
+            '-r', '2',         # at 2 Hz (runs for 5 seconds)
+            '/jaka_zu5_controller/joint_trajectory',
+            'trajectory_msgs/msg/JointTrajectory',
+            (
+                '{'
+                'joint_names: [joint_1,joint_2,joint_3,joint_4,joint_5,joint_6],'
+                'points: [{'
+                'positions: [-0.000916,1.5723,0.000212,-0.000581,0.0,-2.4759],'
+                'velocities: [0.0,0.0,0.0,0.0,0.0,0.0],'
+                'time_from_start: {sec: 2, nanosec: 0}'
+                '}]'
+                '}'
+            ),
+        ],
+        output='screen',
+    )
+
     # ===================== Chained Event Handlers =====================
-    # JSB → arm → gripper → MoveIt + RViz
+    # JSB → (5s delay) → arm → (hold_position + gripper) → MoveIt + RViz
     jsb_done = RegisterEventHandler(
-        OnProcessExit(target_action=spawn_jsb, on_exit=[spawn_arm])
+        OnProcessExit(target_action=spawn_jsb, on_exit=[
+            TimerAction(period=5.0, actions=[spawn_arm])   # 5s gap: let CM settle after JSB
+        ])
     )
     arm_done = RegisterEventHandler(
-        OnProcessExit(target_action=spawn_arm, on_exit=[spawn_gripper])
+        OnProcessExit(target_action=spawn_arm, on_exit=[hold_position, spawn_gripper])
     )
     gripper_done = RegisterEventHandler(
         OnProcessExit(target_action=spawn_gripper, on_exit=[move_group_node, rviz])
@@ -224,11 +272,12 @@ def generate_launch_description():
     return LaunchDescription([
         set_gz_resource,
 
-        # Core
+        # Core sim
         gazebo,
         robot_state_publisher,
         ign_bridge,
         cam_gz_tf,
+        zed_camera_tf,        # ZED2i TF: world → zed2i_camera_link
 
         # Spawn robot after Gazebo starts
         TimerAction(period=5.0, actions=[spawn_robot]),

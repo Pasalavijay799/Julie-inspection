@@ -83,6 +83,7 @@
             </mesh>
           </geometry>
         </collision>
+        <!-- Full STL visual kept unchanged -->
         <visual name="visual">
           <geometry>
             <mesh>
@@ -98,6 +99,28 @@
         </visual>
       </link>
     </model>
+
+    <!-- ZED 2i camera body only — 170x40x40mm at X=0.90 Y=0.90 Z=1.50m
+         Tilted 30° down, facing the robot workspace from the corner. -->
+    <model name="zed2i_mount">
+      <static>true</static>
+      <pose>0.90 0.90 1.50 0 -0.524 -2.356</pose>
+      <link name="camera_body">
+        <visual name="camera_visual">
+          <geometry>
+            <box>
+              <size>0.17 0.04 0.04</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.08 0.08 1</ambient>
+            <diffuse>0.12 0.12 0.12 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
 
   </world>
 </sdf>
