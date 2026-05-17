@@ -1,0 +1,87 @@
+# =============================================================================
+# ROS 2 / Colcon workspace — .gitignore
+# =============================================================================
+
+# ── Colcon build artifacts ────────────────────────────────────────────────────
+build/
+install/
+log/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+
+# ── C / C++ build artifacts ───────────────────────────────────────────────────
+*.o
+*.a
+*.so
+*.so.*
+*.out
+*.dSYM/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!*Config.cmake
+!*config.cmake
+
+# ── VS Code ───────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/c_cpp_properties.json
+# Keep extensions.json if you want to share recommended extensions
+# .vscode/extensions.json
+
+# ── IDE / Editor ──────────────────────────────────────────────────────────────
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── ROS 2 specific ────────────────────────────────────────────────────────────
+*.bag
+*.bag.active
+*.db3
+*.db3-shm
+*.db3-wal
+rosbag2_*/
+COLCON_IGNORE
+
+# ── Gazebo / Ignition ─────────────────────────────────────────────────────────
+*.world~
+*.sdf~
+
+# ── ZED Camera calibration cache (auto-generated at runtime) ─────────────────
+/usr/local/zed/settings/
+
+# ── Environment / secrets ────────────────────────────────────────────────────
+.env
+*.pem
+*.key
+
+# ── Large binary / data files (keep xlsx tracked for joint angles) ────────────
+*.bin
+*.npz
+*.pkl
+
+# ── Temporary / scratch ───────────────────────────────────────────────────────
+*.tmp
+*.bak
+*.orig
+*.log
+
+# ── Documentation build output ───────────────────────────────────────────────
+docs/_build/
+site/

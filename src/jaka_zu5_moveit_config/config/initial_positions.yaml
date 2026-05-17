@@ -1,0 +1,10 @@
+# Default initial positions for jaka_zu5's ros2_control
+# Upright "home" position: arm standing straight up
+
+initial_positions:
+  joint_1: -0.000915816499955101
+  joint_2: 1.5723364339040922
+  joint_3: 0.00021169923493945695
+  joint_4: -0.0005807879831484262
+  joint_5: 2.947614618788012e-06
+  joint_6: -2.4758574037880026
