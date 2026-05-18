@@ -109,6 +109,7 @@ install(TARGETS
 # Install Python scripts
 install(PROGRAMS
   scripts/iit_logo_stable.py
+  scripts/iit_logo_safety_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -48,6 +48,8 @@ setup(
     entry_points={
         'console_scripts': [
             'auto_planner_node = jaka_visual_inspection.auto_planner_node:main',
+            'safety_zone_node = jaka_visual_inspection.safety_zone_node:main',
+            'safety_camera_viewer = jaka_visual_inspection.safety_camera_viewer:main',
         ],
     },
 )

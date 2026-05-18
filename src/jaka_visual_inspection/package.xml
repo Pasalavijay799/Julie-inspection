@@ -16,6 +16,7 @@
   <depend>moveit_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>std_msgs</depend>
+  <depend>zed_msgs</depend>
   <depend>trajectory_msgs</depend>
   <depend>control_msgs</depend>
 

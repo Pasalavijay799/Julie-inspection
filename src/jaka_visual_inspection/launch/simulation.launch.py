@@ -138,7 +138,7 @@ def generate_launch_description():
         remappings=[
             ('/camera/image', '/camera/color/image_raw'),
             ('/camera/depth_image', '/camera/depth/image_raw'),
-            ('/camera/camera_info', '/camera/depth/camera_info'),
+            ('/camera/camera_info', '/camera/color/camera_info'),
         ],
         output='screen',
         parameters=[{'use_sim_time': True}],
@@ -208,25 +208,24 @@ def generate_launch_description():
         parameters=rviz_parameters,
     )
 
-    # ===== ZED 2i Static TF =====
-    # Publishes world → zed2i_camera_link at the real-world mount position:
-    #   X=0.90 m, Y=0.90 m, Z=1.50 m, pitch=-0.524 rad (30° down), yaw=-2.356 rad (facing robot)
-    zed_camera_tf = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='zed2i_camera_tf',
-        arguments=[
-            '--x',     '0.90',
-            '--y',     '0.90',
-            '--z',     '1.50',
-            '--roll',  '0.0',
-            '--pitch', '-0.524',
-            '--yaw',   '-2.356',
-            '--frame-id',       'world',
-            '--child-frame-id', 'zed2i_camera_link',
-        ],
-        output='screen',
-    )
+    # ===== ZED 2i Static TF (DISABLED - Using ZED VSLAM instead) =====
+    # zed_camera_tf = Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     name='zed2i_camera_tf',
+    #     arguments=[
+    #         '--x',     '0.90',
+    #         '--y',     '0.90',
+    #         '--z',     '1.50',
+    #         '--roll',  '0.0',
+    #         '--pitch', '-1.047',  # 60° down
+    #         '--yaw',   '-2.356',
+    #         '--frame-id',       'world',
+    #         '--child-frame-id', 'zed_camera_link',
+    #     ],
+    #     output='screen',
+    # )
+
 
     # ===================== Hold Position at Startup =====================
     # Publishes initial joint angles as a trajectory the moment the arm
@@ -254,6 +253,44 @@ def generate_launch_description():
         output='screen',
     )
 
+    # ===================== ZED 2i Real Camera Node =====================
+    zed_safety_config = os.path.join(
+        get_package_share_directory('jaka_visual_inspection'),
+        'config', 'zed2i_safety.yaml'
+    )
+    zed_camera = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('zed_wrapper'),
+                'launch', 'zed_camera.launch.py'
+            )
+        ),
+        launch_arguments={
+            'camera_model': 'zed2i',
+            'camera_name': 'zed',
+            'publish_urdf': 'true',
+            'publish_tf': 'true',       # Use internal VSLAM TF
+            'publish_map_tf': 'true',   # Publish world -> odom
+            'use_sim_time': 'false',
+            'ros_params_override_path': zed_safety_config,
+        }.items(),
+    )
+
+    # ===== Safety Zone Node (DISABLED - Handled by OpenCV Viewer) =====
+    # safety_zone_node = Node(
+    #     package='jaka_visual_inspection',
+    #     executable='safety_zone_node',
+    #     name='safety_zone_node',
+    #     output='screen',
+    #     parameters=[{
+    #         'safety_radius': 1.5,
+    #         'safety_height': 2.0,
+    #         'robot_center_x': 0.0,
+    #         'robot_center_y': 0.0,
+    #         'check_rate_hz': 10.0,
+    #     }],
+    # )
+
     # ===================== Chained Event Handlers =====================
     # JSB → (5s delay) → arm → (hold_position + gripper) → MoveIt + RViz
     jsb_done = RegisterEventHandler(
@@ -277,7 +314,10 @@ def generate_launch_description():
         robot_state_publisher,
         ign_bridge,
         cam_gz_tf,
-        zed_camera_tf,        # ZED2i TF: world → zed2i_camera_link
+        # zed_camera_tf is disabled; using ZED VSLAM for TF
+
+        # Real ZED 2i camera (delayed to let system settle)
+        TimerAction(period=15.0, actions=[zed_camera]),
 
         # Spawn robot after Gazebo starts
         TimerAction(period=5.0, actions=[spawn_robot]),

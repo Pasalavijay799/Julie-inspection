@@ -2,10 +2,21 @@
 <sdf version="1.8">
   <world name="jaka_inspection_world">
 
-    <!-- Physics -->
+    <!-- Physics — ODE max_contacts limits contact points per pair,
+         suppresses "Trimesh-trimesh hash table bucket overflow" warning -->
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+        </solver>
+        <constraints>
+          <contact_max_correcting_vel>100</contact_max_correcting_vel>
+          <contact_surface_layer>0.001</contact_surface_layer>
+        </constraints>
+      </ode>
+      <max_contacts>4</max_contacts>
     </physics>
 
     <!-- Plugins -->
@@ -101,10 +112,10 @@
     </model>
 
     <!-- ZED 2i camera body only — 170x40x40mm at X=0.90 Y=0.90 Z=1.50m
-         Tilted 30° down, facing the robot workspace from the corner. -->
+         Tilted 60° down, facing the robot workspace from the corner. -->
     <model name="zed2i_mount">
       <static>true</static>
-      <pose>0.90 0.90 1.50 0 -0.524 -2.356</pose>
+      <pose>0.90 0.90 1.50 0 -1.047 -2.356</pose>
       <link name="camera_body">
         <visual name="camera_visual">
           <geometry>
