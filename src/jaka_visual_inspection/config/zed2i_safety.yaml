@@ -1,21 +1,25 @@
-# ZED 2i body tracking override for safety zone detection
+# ZED 2i config — HD720 @ 60 FPS, fast depth, body tracking
 # Passed as ros_params_override_path to the ZED wrapper
 ---
 /**:
   ros__parameters:
+    general:
+      grab_resolution: 'HD720'       # 1280x720 - best speed/quality balance
+      grab_frame_rate: 60            # 60 FPS from camera hardware
+      pub_frame_rate: 60.0           # publish at full 60 FPS
+      img_downsample_factor: 1.0     # no downsampling on publish
+
+    depth:
+      depth_mode: 'PERFORMANCE'      # fastest depth computation
+      depth_stabilization: 0         # disable for lower latency
+      pub_frame_rate: 60.0
+
     pos_tracking:
       pos_tracking_enabled: true
       publish_tf: true
       publish_map_tf: true
       map_frame: 'world'
       initial_base_pose: [0.90, 0.90, 1.50, 0.0, -1.047, -2.356]
-      
+
     body_tracking:
-      bt_enabled: true
-      model: 'HUMAN_BODY_FAST'
-      body_format: 'BODY_18'
-      allow_reduced_precision: true
-      max_range: 5.0
-      detection_confidence: 40
-      enable_tracking: true
-      enable_body_fitting: false
+      bt_enabled: false              # disabled — using YOLO instead
