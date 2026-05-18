@@ -81,8 +81,10 @@ class IITLogoPickAndPlace(Node):
         self.create_subscription(JointState, '/joint_states', self._joint_cb, _QOS_BEST_EFFORT)
 
         self.pause_flag  = False
-        self.stop_flag   = False   # set True on Ctrl+C → finish current move then exit
-        self.active_goal_handle = None
+        self.stop_flag   = False
+        self.active_goal_handle         = None
+        self.active_gripper_goal_handle = None   # track gripper separately
+        self.current_gripper_pos        = GRIPPER_OPEN  # last commanded gripper
         self.create_subscription(Bool, '/safety_override', self._safety_cb, 10)
 
         self.get_logger().info('IIT Logo node ready.')
@@ -96,10 +98,14 @@ class IITLogoPickAndPlace(Node):
 
     def _safety_cb(self, msg: Bool):
         if msg.data and not self.pause_flag:
-            self.get_logger().warn('HUMAN NEAR — PAUSING (CANCELLING GOAL)')
+            self.get_logger().warn('HUMAN NEAR — PAUSING')
             self.pause_flag = True
+            # Cancel active arm goal
             if self.active_goal_handle is not None:
                 self.active_goal_handle.cancel_goal_async()
+            # Cancel active gripper goal (if any)
+            if self.active_gripper_goal_handle is not None:
+                self.active_gripper_goal_handle.cancel_goal_async()
         elif not msg.data and self.pause_flag:
             self.get_logger().info('SAFE — RESUMING')
             self.pause_flag = False
@@ -148,9 +154,9 @@ class IITLogoPickAndPlace(Node):
                 self.get_logger().info(f'✓ Reached{tag}')
                 return
 
-            # Compute remaining duration roughly (max joint speed ~ 0.5 rad/s)
-            speed = 0.5 
-            rem_duration = max(0.5, max_dist / speed)
+            # Compute remaining duration (use generous minimum for smooth resume)
+            speed        = 0.5
+            rem_duration = max(2.0, max_dist / speed)   # ←4 minimum 2 s — prevents harsh jerk
 
             INTERP_DT = 0.1
             n_steps = max(1, int(round(rem_duration / INTERP_DT)))
@@ -186,14 +192,20 @@ class IITLogoPickAndPlace(Node):
             self.active_goal_handle = None
 
             res = result_future.result().result
-            # error_code 0 is SUCCESS
             if res.error_code == 0:
                 self.current_positions = list(target_rad)
                 time.sleep(SETTLE_PAUSE)
                 self.get_logger().info(f'✓ Reached{tag}')
                 return
             else:
-                self.get_logger().warn(f'Goal interrupted. Re-planning to{tag} from current paused position...')
+                # Goal was cancelled (safety pause) — wait for robot to fully stop
+                # before re-planning.  Reading current_positions too early gives a
+                # mid-motion joint state and causes the harsh jerk on resume.
+                self.get_logger().warn(f'Goal interrupted{tag} — waiting for robot to settle…')
+                time.sleep(1.0)   # physical deceleration time
+                for _ in range(10):
+                    rclpy.spin_once(self, timeout_sec=0.05)
+                self.get_logger().warn(f'Re-planning{tag} from settled position…')
 
     # ------------------------------------------------------------------
     # Gripper
@@ -226,7 +238,16 @@ class IITLogoPickAndPlace(Node):
 
         future = self.gripper_client.send_goal_async(goal)
         rclpy.spin_until_future_complete(self, future, timeout_sec=3.0)
-        time.sleep(duration_sec + 0.5)
+        gh = future.result()
+        if gh and gh.accepted:
+            self.active_gripper_goal_handle = gh
+            self.current_gripper_pos        = width_m   # save for resume
+            result_f = gh.get_result_async()
+            rclpy.spin_until_future_complete(self, result_f,
+                                             timeout_sec=duration_sec + 2.0)
+            self.active_gripper_goal_handle = None
+        else:
+            time.sleep(duration_sec + 0.5)
 
 
 # =============================================================================
