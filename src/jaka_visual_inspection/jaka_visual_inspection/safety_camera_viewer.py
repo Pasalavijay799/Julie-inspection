@@ -35,7 +35,7 @@ ROBOT_X_CAM = -0.10   # metres (+ = right of camera centre)
 ROBOT_Y_CAM =  0.40   # metres (+ = below camera centre)
 ROBOT_Z_CAM =  1.80   # metres — depth from camera to robot base
 
-ZONE_RADIUS  =  1.00   # safety cylinder radius (metres)
+ZONE_RADIUS  =  0.60   # safety cylinder radius (metres)
 ZONE_HEIGHT  =  2.20   # cylinder height (metres)
 N_RING_PTS   =  30     # wireframe ring segments
 DEPTH_PATCH  =   5     # px: depth patch radius for stable sampling
